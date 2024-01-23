@@ -3,10 +3,10 @@ const http = require("http");
 const express = require("express");
 const socketio = require("socket.io");
 const formatMessage = require("./utils/messages");
-const createAdapter = require("@socket.io/redis-adapter").createAdapter;
-const redis = require("redis");
+//const createAdapter = require("@socket.io/redis-adapter").createAdapter;
+//const redis = require("redis");
 require("dotenv").config();
-const { createClient } = redis;
+//const { createClient } = redis;
 const {
   userJoin,
   getCurrentUser,
@@ -21,32 +21,32 @@ const io = socketio(server);
 // Set static folder
 app.use(express.static(path.join(__dirname, "public")));
 
-const botName = "ChatCord Bot";
+const botName = "PiChat Live";
 
-(async () => {
-  pubClient = createClient({ url: "redis://127.0.0.1:6379" });
-  await pubClient.connect();
-  subClient = pubClient.duplicate();
-  io.adapter(createAdapter(pubClient, subClient));
-})();
+// (async () => {
+//   pubClient = createClient({ url: "redis://127.0.0.1:3000" });
+//   await pubClient.connect();
+//   subClient = pubClient.duplicate();
+//   io.adapter(createAdapter(pubClient, subClient));
+// })();
 
 // Run when client connects
 io.on("connection", (socket) => {
-  console.log(io.of("/").adapter);
+  //console.log(io.of("/").adapter);
   socket.on("joinRoom", ({ username, room }) => {
     const user = userJoin(socket.id, username, room);
 
     socket.join(user.room);
 
     // Welcome current user
-    socket.emit("message", formatMessage(botName, "Welcome to ChatCord!"));
+    socket.emit("message", formatMessage(botName, `Welcome to PiChat! ${user.username}`));
 
     // Broadcast when a user connects
     socket.broadcast
       .to(user.room)
       .emit(
         "message",
-        formatMessage(botName, `${user.username} has joined the chat`)
+        formatMessage(botName, `${user.username} has joined the chat! ALERT ! NEW - USER - JOINED`)
       );
 
     // Send users and room info
@@ -70,7 +70,7 @@ io.on("connection", (socket) => {
     if (user) {
       io.to(user.room).emit(
         "message",
-        formatMessage(botName, `${user.username} has left the chat`)
+        formatMessage(botName, `${user.username} has left the chat! ALERT ! USER - LEFT`)
       );
 
       // Send users and room info
